@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course View - EduPlatform</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .course-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            height: 0;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .lesson-list {
+            margin-bottom: 2rem;
+        }
+
+        .lesson-item {
+            padding: 1rem;
+            border: 1px solid #ddd;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .lesson-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .lesson-item.active {
+            background-color: #e9ecef;
+            font-weight: bold;
+        }
+
+        .test-container {
+            margin-top: 2rem;
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .question {
+            margin-bottom: 1rem;
+        }
+
+        .options label {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .submit-test {
+            margin-top: 1rem;
+            padding: 0.5rem 1rem;
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .submit-test:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="logo">
+                <h1>EduPlatform</h1>
+            </div>
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/courses">Courses</a></li>
+                <li><a href="/user-dashboard">Dashboard</a></li>
+                <li><a href="#" id="logoutBtn">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div class="course-container">
+            <h2 id="courseTitle"></h2>
+            <div class="video-container">
+                <iframe id="videoPlayer" src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+            </div>
+            <div class="lesson-list" id="lessonList"></div>
+            <div class="test-container" id="testContainer" style="display: none;">
+                <h3>Lesson Test</h3>
+                <div id="testQuestions"></div>
+                <button class="submit-test" id="submitTest">Submit Test</button>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>About Us</h3>
+                <p>EduPlatform is dedicated to providing quality online education.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="/courses">All Courses</a></li>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Contact</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 EduPlatform. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = '/login';
+        }
+
+        const courseId = new URLSearchParams(window.location.search).get('id');
+        let currentCourse;
+
+        async function fetchCourseData() {
+            try {
+                const response = await fetch(`/api/courses/${courseId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                currentCourse = await response.json();
+                document.getElementById('courseTitle').textContent = currentCourse.title;
+                renderLessonList();
+            } catch (error) {
+                console.error('Error fetching course data:', error);
+            }
+        }
+
+        function renderLessonList() {
+            const lessonList = document.getElementById('lessonList');
+            lessonList.innerHTML = '';
+            currentCourse.lessons.forEach((lesson, index) => {
+                const lessonItem = document.createElement('div');
+                lessonItem.className = 'lesson-item';
+                lessonItem.textContent = `Lesson ${index + 1}: ${lesson.title}`;
+                lessonItem.onclick = () => loadLesson(index);
+                lessonList.appendChild(lessonItem);
+            });
+            if (currentCourse.lessons.length > 0) {
+                loadLesson(0);
+            }
+        }
+
+        function loadLesson(index) {
+            const lesson = currentCourse.lessons[index];
+            document.getElementById('videoPlayer').src = lesson.videoUrl;
+            document.querySelectorAll('.lesson-item').forEach((item, i) => {
+                item.classList.toggle('active', i === index);
+            });
+            loadTest(index);
+        }
+
+        function loadTest(lessonIndex) {
+            const testContainer = document.getElementById('testContainer');
+            const testQuestions = document.getElementById('testQuestions');
+            const lesson = currentCourse.lessons[lessonIndex];
+            
+            if (lesson.test) {
+                testContainer.style.display = 'block';
+                testQuestions.innerHTML = '';
+                lesson.test.questions.forEach((question, index) => {
+                    const questionElement = document.createElement('div');
+                    questionElement.className = 'question';
+                    questionElement.innerHTML = `
+                        <p><strong>Question ${index + 1}:</strong> ${question.text}</p>
+                        <div class="options">
+                            ${question.options.map((option, optionIndex) => `
+                                <label>
+                                    <input type="radio" name="question${index}" value="${optionIndex}">
+                                    ${option}
+                                </label>
+                            `).join('')}
+                        </div>
+                    `;
+                    testQuestions.appendChild(questionElement);
+                });
+            } else {
+                testContainer.style.display = 'none';
+            }
+        }
+
+        document.getElementById('submitTest').addEventListener('click', async () => {
+            const answers = Array.from(document.querySelectorAll('.question')).map((questionElement, index) => {
+                const selectedOption = questionElement.querySelector('input[type="radio"]:checked');
+                return selectedOption ? parseInt(selectedOption.value) : null;
+            });
+
+            try {
+                const response = await fetch(`/api/courses/${courseId}/test`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ answers })
+                });
+                const result = await response.json();
+                alert(`Your score: ${result.score}%`);
+            } catch (error) {
+                console.error('Error submitting test:', error);
+                alert('Error submitting test. Please try again.');
+            }
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('token');
+            window.location.href = '/login';
+        });
+
+        fetchCourseData();
+    </script>
+</body>
+</html>

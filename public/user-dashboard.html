@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard - EduPlatform</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .course-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .course-card {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .course-card h3 {
+            margin-top: 0;
+        }
+
+        .course-card .progress {
+            margin-top: 1rem;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            height: 10px;
+            overflow: hidden;
+        }
+
+        .course-card .progress-bar {
+            height: 100%;
+            background-color: #3498db;
+        }
+
+        .certificate-list {
+            margin-top: 2rem;
+        }
+
+        .certificate-item {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .certificate-item .download-btn {
+            background-color: #3498db;
+            color: #fff;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .certificate-item .download-btn:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="logo">
+                <h1>EduPlatform</h1>
+            </div>
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/courses">Courses</a></li>
+                <li><a href="#" id="logoutBtn">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div class="dashboard-container">
+            <div class="dashboard-header">
+                <h2>Welcome, <span id="userName"></span></h2>
+                <button id="editProfileBtn">Edit Profile</button>
+            </div>
+            <h3>Your Courses</h3>
+            <div id="courseList" class="course-list">
+                <!-- Course cards will be dynamically added here -->
+            </div>
+            <h3>Your Certificates</h3>
+            <div id="certificateList" class="certificate-list">
+                <!-- Certificates will be dynamically added here -->
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>About Us</h3>
+                <p>EduPlatform is dedicated to providing quality online education.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="/courses">All Courses</a></li>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Contact</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 EduPlatform. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        let token;
+
+        function getToken() {
+            token = localStorage.getItem('token');
+            if (!token) {
+                console.log('No token found, redirecting to login');
+                window.location.replace('/login');
+                return null;
+            }
+            return token;
+        }
+
+        // Fetch user data and populate dashboard
+        async function fetchUserData() {
+            try {
+                token = getToken();
+                if (!token) return;
+
+                console.log('Token found:', token);
+                const response = await fetch('/api/user/profile', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                console.log('Response status:', response.status);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch user data: ${response.status}`);
+                }
+                const userData = await response.json();
+                console.log('User data:', userData);
+                document.getElementById('userName').textContent = `${userData.firstName} ${userData.lastName}`;
+                fetchUserCourses();
+                fetchUserCertificates();
+                return userData;
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+                alert('Failed to load user data. Please try logging in again.');
+                localStorage.removeItem('token');
+                window.location.replace('/login');
+            }
+        }
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM Content Loaded');
+            token = getToken();
+            if (token) {
+                fetchUserData();
+            }
+        });
+
+        // Fetch user's enrolled courses
+        async function fetchUserCourses() {
+            try {
+                const response = await fetch('/api/user/courses', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                console.log('Courses response status:', response.status);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch courses: ${response.status}`);
+                }
+                const courses = await response.json();
+                console.log('Courses data:', courses);
+                const courseList = document.getElementById('courseList');
+                courseList.innerHTML = '';
+                if (courses.length === 0) {
+                    courseList.innerHTML = '<p>You are not enrolled in any courses yet.</p>';
+                } else {
+                    courses.forEach(course => {
+                        const courseCard = document.createElement('div');
+                        courseCard.className = 'course-card';
+                        courseCard.innerHTML = `
+                            <h3>${course.title}</h3>
+                            <p>${course.description}</p>
+                            <div class="progress">
+                                <div class="progress-bar" style="width: ${course.progress}%"></div>
+                            </div>
+                            <p>${course.progress}% Complete</p>
+                            <a href="/course/${course._id}">Continue Course</a>
+                        `;
+                        courseList.appendChild(courseCard);
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching user courses:', error);
+                const courseList = document.getElementById('courseList');
+                courseList.innerHTML = '<p>Failed to load courses. Please try again later.</p>';
+            }
+        }
+
+        // Fetch user's certificates
+        async function fetchUserCertificates() {
+            try {
+                const response = await fetch('/api/user/certificates', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const certificates = await response.json();
+                const certificateList = document.getElementById('certificateList');
+                certificateList.innerHTML = '';
+                certificates.forEach(cert => {
+                    const certItem = document.createElement('div');
+                    certItem.className = 'certificate-item';
+                    certItem.innerHTML = `
+                        <div>
+                            <h4>${cert.courseName}</h4>
+                            <p>Issued on: ${new Date(cert.issueDate).toLocaleDateString()}</p>
+                        </div>
+                        <button class="download-btn" onclick="downloadCertificate('${cert._id}')">Download</button>
+                    `;
+                    certificateList.appendChild(certItem);
+                });
+            } catch (error) {
+                console.error('Error fetching user certificates:', error);
+            }
+        }
+
+        // Download certificate function (to be implemented)
+        async function downloadCertificate(certId) {
+            try {
+                const response = await fetch(`/api/certificates/${certId}/download`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to download certificate');
+                }
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = `certificate-${certId}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error('Error downloading certificate:', error);
+                alert('Failed to download certificate. Please try again.');
+            }
+        }
+
+        // Logout function
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userRole');
+            window.location.href = '/login';
+        });
+
+        // Edit profile function
+        document.getElementById('editProfileBtn').addEventListener('click', () => {
+            openEditProfileModal();
+        });
+
+        // Initialize dashboard
+        fetchUserData();
+
+        // Function to check for course completion and generate certificate
+        async function checkCourseCompletion(courseId) {
+            try {
+                const response = await fetch(`/api/courses/${courseId}/certificate`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    alert(`Congratulations! You've completed the course. Certificate ID: ${result.certificateId}`);
+                    fetchUserCertificates(); // Refresh the certificates list
+                } else if (response.status === 400) {
+                    alert('You have not completed all requirements for this course yet.');
+                } else {
+                    throw new Error('Failed to check course completion');
+                }
+            } catch (error) {
+                console.error('Error checking course completion:', error);
+                alert('Failed to check course completion. Please try again.');
+            }
+        }
+
+        // Edit Profile Modal
+        function openEditProfileModal() {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <h2>Edit Profile</h2>
+                    <form id="editProfileForm">
+                        <div class="form-group">
+                            <label for="firstName">First Name</label>
+                            <input type="text" id="firstName" name="firstName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="lastName">Last Name</label>
+                            <input type="text" id="lastName" name="lastName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                        <button type="submit" class="action-btn">Save Changes</button>
+                    </form>
+                </div>
+            `;
+            document.body.appendChild(modal);
+
+            const closeBtn = modal.querySelector('.close');
+            closeBtn.onclick = () => {
+                document.body.removeChild(modal);
+            };
+
+            window.onclick = (event) => {
+                if (event.target == modal) {
+                    document.body.removeChild(modal);
+                }
+            };
+
+            // Populate form with current user data
+            fetchUserData().then(userData => {
+                document.getElementById('firstName').value = userData.firstName;
+                document.getElementById('lastName').value = userData.lastName;
+                document.getElementById('email').value = userData.email;
+            });
+
+            // Handle form submission
+            document.getElementById('editProfileForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const userData = Object.fromEntries(formData.entries());
+
+                try {
+                    const response = await fetch('/api/user/profile', {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(userData)
+                    });
+
+                    if (response.ok) {
+                        alert('Profile updated successfully');
+                        document.body.removeChild(modal);
+                        fetchUserData(); // Refresh user data
+                    } else {
+                        throw new Error('Failed to update profile');
+                    }
+                } catch (error) {
+                    console.error('Error updating profile:', error);
+                    alert('Failed to update profile. Please try again.');
+                }
+            });
+        }
+
+        // Add styles for the modal
+        const style = document.createElement('style');
+        style.textContent = `
+            .modal {
+                display: block;
+                position: fixed;
+                z-index: 1;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                overflow: auto;
+                background-color: rgba(0,0,0,0.4);
+            }
+            .modal-content {
+                background-color: #fefefe;
+                margin: 15% auto;
+                padding: 20px;
+                border: 1px solid #888;
+                width: 80%;
+                max-width: 500px;
+            }
+            .close {
+                color: #aaa;
+                float: right;
+                font-size: 28px;
+                font-weight: bold;
+                cursor: pointer;
+            }
+            .close:hover,
+            .close:focus {
+                color: #000;
+                text-decoration: none;
+                cursor: pointer;
+            }
+        `;
+        document.head.appendChild(style);
+        async function checkCourseCompletion(courseId) {
+            try {
+                const response = await fetch(`/api/courses/${courseId}/certificate`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    alert(`Congratulations! You've completed the course. Certificate ID: ${result.certificateId}`);
+                    fetchUserCertificates(); // Refresh the certificates list
+                } else if (response.status === 400) {
+                    alert('You have not completed all requirements for this course yet.');
+                } else {
+                    throw new Error('Failed to check course completion');
+                }
+            } catch (error) {
+                console.error('Error checking course completion:', error);
+                alert('Failed to check course completion. Please try again.');
+            }
+        }
+    </script>
+</body>
+</html>

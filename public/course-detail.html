@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Detail - EduPlatform</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* Course detail specific styles */
+        .course-header {
+            background-color: #f8f9fa;
+            padding: 3rem 5%;
+        }
+
+        .course-header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            .course-header-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .course-info h1 {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+
+        .course-meta-info {
+            display: flex;
+            gap: 2rem;
+            margin: 1rem 0;
+            color: #666;
+        }
+
+        .course-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .course-card-detail {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .price-tag {
+            font-size: 2rem;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+
+        .enroll-btn {
+            width: 100%;
+            padding: 1rem;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .enroll-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .course-includes {
+            margin-top: 1.5rem;
+        }
+
+        .course-includes h3 {
+            margin-bottom: 1rem;
+        }
+
+        .includes-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            color: #666;
+        }
+
+        .course-content {
+            max-width: 1200px;
+            margin: 3rem auto;
+            padding: 0 5%;
+        }
+
+        .course-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .tab-btn {
+            padding: 1rem 2rem;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 1rem;
+            color: #666;
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab-btn.active {
+            color: #3498db;
+            border-bottom-color: #3498db;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .curriculum-section {
+            margin-bottom: 2rem;
+        }
+
+        .section-header {
+            background-color: #f8f9fa;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .section-content {
+            padding-left: 1rem;
+        }
+
+        .lesson-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .lesson-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .lesson-duration {
+            color: #666;
+        }
+
+        .reviews-container {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .review-card {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 10px;
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .reviewer-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .reviewer-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #ddd;
+        }
+
+        .rating {
+            color: #f1c40f;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="logo">
+                <h1>EduPlatform</h1>
+            </div>
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/courses">Courses</a></li>
+                <li><a href="/login">Login</a></li>
+                <li><a href="/register">Register</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="course-header">
+            <div class="course-header-content">
+                <div class="course-info">
+                    <h1 id="courseTitle">Advanced JavaScript Programming</h1>
+                    <p id="courseDescription">Master modern JavaScript with advanced concepts, design patterns, and real-world applications.</p>
+                    <div class="course-meta-info">
+                        <div class="course-meta-item">
+                            <span>⭐</span>
+                            <span id="courseRating">4.8 (920 reviews)</span>
+                        </div>
+                        <div class="course-meta-item">
+                            <span>👥</span>
+                            <span id="enrolledStudents">1,500 students</span>
+                        </div>
+                        <div class="course-meta-item">
+                            <span>🕒</span>
+                            <span id="courseDuration">20 hours</span>
+                        </div>
+                    </div>
+                    <div class="instructor-info">
+                        <p>Created by <strong id="instructorName">Jane Smith</strong></p>
+                    </div>
+                </div>
+                <div class="course-card-detail">
+                    <div class="price-tag" id="coursePrice">$69.99</div>
+                    <button class="enroll-btn">Enroll Now</button>
+                    <div class="course-includes">
+                        <h3>This course includes:</h3>
+                        <div class="includes-item">
+                            <span>📹</span>
+                            <span>20 hours on-demand video</span>
+                        </div>
+                        <div class="includes-item">
+                            <span>📝</span>
+                            <span>15 coding exercises</span>
+                        </div>
+                        <div class="includes-item">
+                            <span>📄</span>
+                            <span>Certificate of completion</span>
+                        </div>
+                        <div class="includes-item">
+                            <span>💻</span>
+                            <span>Lifetime access</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="course-content">
+            <div class="course-tabs">
+                <button class="tab-btn active" data-tab="curriculum">Curriculum</button>
+                <button class="tab-btn" data-tab="overview">Overview</button>
+                <button class="tab-btn" data-tab="reviews">Reviews</button>
+            </div>
+
+            <div class="tab-content active" id="curriculum">
+                <div class="curriculum-section">
+                    <div class="section-header">
+                        <h3>Section 1: Introduction</h3>
+                    </div>
+                    <div class="section-content">
+                        <div class="lesson-item">
+                            <div class="lesson-title">
+                                <span>📹</span>
+                                <span>Course Overview</span>
+                            </div>
+                            <span class="lesson-duration">15:00</span>
+                        </div>
+                        <div class="lesson-item">
+                            <div class="lesson-title">
+                                <span>📹</span>
+                                <span>Setting Up Development Environment</span>
+                            </div>
+                            <span class="lesson-duration">20:00</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- More sections will be added dynamically -->
+            </div>
+
+            <div class="tab-content" id="overview">
+                <h2>Course Overview</h2>
+                <p>This comprehensive course covers advanced JavaScript concepts including:</p>
+                <ul>
+                    <li>ES6+ features and syntax</li>
+                    <li>Asynchronous programming</li>
+                    <li>Design patterns</li>
+                    <li>Performance optimization</li>
+                    <li>Testing and debugging</li>
+                </ul>
+            </div>
+
+            <div class="tab-content" id="reviews">
+                <div class="reviews-container">
+                    <div class="review-card">
+                        <div class="review-header">
+                            <div class="reviewer-info">
+                                <div class="reviewer-avatar"></div>
+                                <div>
+                                    <h4>John Doe</h4>
+                                    <div class="rating">⭐⭐⭐⭐⭐</div>
+                                </div>
+                            </div>
+                            <span>2 weeks ago</span>
+                        </div>
+                        <p>Excellent course! The content is well-structured and the explanations are clear.</p>
+                    </div>
+                    <!-- More reviews will be added dynamically -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>About Us</h3>
+                <p>EduPlatform is dedicated to providing quality online education.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="/courses">All Courses</a></li>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Contact</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 EduPlatform. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Sample course data
+        const sampleCourses = [
+            {
+                id: 1,
+                title: "Introduction to Web Development",
+                instructor: "John Doe",
+                rating: 4.5,
+                students: 1200,
+                price: "$49.99",
+                description: "Learn the fundamentals of web development including HTML, CSS, and JavaScript."
+            },
+            {
+                id: 2,
+                title: "Advanced JavaScript",
+                instructor: "Jane Smith",
+                rating: 4.8,
+                students: 800,
+                price: "$69.99",
+                description: "Master advanced JavaScript concepts, ES6+, and modern development practices."
+            },
+            {
+                id: 3,
+                title: "MongoDB Essentials",
+                instructor: "Mike Johnson",
+                rating: 4.6,
+                students: 950,
+                price: "$59.99",
+                description: "Learn MongoDB database design, queries, and best practices."
+            }
+        ];
+
+        // Tab switching functionality
+        document.querySelectorAll('.tab-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                // Remove active class from all buttons and contents
+                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                
+                // Add active class to clicked button and corresponding content
+                button.classList.add('active');
+                document.getElementById(button.dataset.tab).classList.add('active');
+            });
+        });
+
+        // Initialize everything when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            const courseId = urlParams.get('id');
+
+            if (!courseId) {
+                window.location.href = '/courses';
+                return;
+            }
+
+            // For now, use the sample course data
+            const course = sampleCourses.find(c => c.id === parseInt(courseId));
+            
+            if (course) {
+                // Update course details
+                document.getElementById('courseTitle').textContent = course.title;
+                document.getElementById('courseDescription').textContent = course.description;
+                document.getElementById('courseRating').textContent = `${course.rating} (${course.students} reviews)`;
+                document.getElementById('enrolledStudents').textContent = `${course.students} students`;
+                document.getElementById('courseDuration').textContent = '20 hours';
+                document.getElementById('instructorName').textContent = course.instructor;
+                document.getElementById('coursePrice').textContent = course.price;
+                
+                // Update page title
+                document.title = `${course.title} - EduPlatform`;
+
+                // Initialize enrollment button
+                const enrollButton = document.querySelector('.enroll-btn');
+                if (enrollButton) {
+                    enrollButton.addEventListener('click', () => {
+                        // For now, simulate not logged in state
+                        const isLoggedIn = false;
+                        if (isLoggedIn) {
+                            alert('Processing enrollment...');
+                        } else {
+                            window.location.href = `/login?redirect=/course-detail?id=${courseId}`;
+                        }
+                    });
+                }
+            } else {
+                // Redirect to courses page if course not found
+                window.location.href = '/courses';
+            }
+
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - EduPlatform</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .admin-section {
+            margin-bottom: 2rem;
+        }
+
+        .admin-section h3 {
+            margin-bottom: 1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 0.5rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f8f9fa;
+        }
+
+        .action-btn {
+            background-color: #3498db;
+            color: #fff;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .action-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 10px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="logo">
+                <h1>EduPlatform</h1>
+            </div>
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/courses">Courses</a></li>
+                <li><a href="#" id="logoutBtn">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div class="dashboard-container">
+            <div class="dashboard-header">
+                <h2>Admin Dashboard</h2>
+            </div>
+            <div class="admin-section">
+                <h3>User Management</h3>
+                <table id="userTable">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- User rows will be dynamically added here -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="admin-section">
+                <h3>Course Management</h3>
+                <button id="addCourseBtn" class="action-btn">Add New Course</button>
+                <table id="courseTable">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Instructor</th>
+                            <th>Duration</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Course rows will be dynamically added here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Add/Edit Course Modal -->
+    <div id="courseModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="courseModalTitle">Add New Course</h2>
+            <form id="courseForm">
+                <div class="form-group">
+                    <label for="courseTitle">Title</label>
+                    <input type="text" id="courseTitle" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="courseDescription">Description</label>
+                    <textarea id="courseDescription" name="description" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="courseDuration">Duration (in weeks)</label>
+                    <input type="number" id="courseDuration" name="duration" required>
+                </div>
+                <div class="form-group">
+                    <label for="courseInstructor">Instructor</label>
+                    <input type="text" id="courseInstructor" name="instructor" required>
+                </div>
+                <button type="submit" class="action-btn">Save Course</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Lesson Modal -->
+    <div id="lessonModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Add New Lesson</h2>
+            <form id="lessonForm">
+                <div class="form-group">
+                    <label for="lessonTitle">Title</label>
+                    <input type="text" id="lessonTitle" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="lessonVideo">Video URL</label>
+                    <input type="url" id="lessonVideo" name="videoUrl" required>
+                </div>
+                <div class="form-group">
+                    <label for="lessonDescription">Description</label>
+                    <textarea id="lessonDescription" name="description" required></textarea>
+                </div>
+                <button type="submit" class="action-btn">Add Lesson</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Test Modal -->
+    <div id="testModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Add Test</h2>
+            <form id="testForm">
+                <div id="questions">
+                    <!-- Questions will be dynamically added here -->
+                </div>
+                <button type="button" id="addQuestion" class="action-btn">Add Question</button>
+                <button type="submit" class="action-btn">Save Test</button>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>About Us</h3>
+                <p>EduPlatform is dedicated to providing quality online education.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="/courses">All Courses</a></li>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Contact</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 EduPlatform. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Check if user is logged in and is an admin
+        const token = localStorage.getItem('token');
+        const userRole = localStorage.getItem('userRole');
+        if (!token || userRole !== 'admin') {
+            window.location.href = '/login';
+        }
+
+        // Fetch users and populate user table
+        async function fetchUsers() {
+            try {
+                const response = await fetch('/api/admin/users', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const users = await response.json();
+                const userTableBody = document.querySelector('#userTable tbody');
+                userTableBody.innerHTML = '';
+                users.forEach(user => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${user.firstName} ${user.lastName}</td>
+                        <td>${user.email}</td>
+                        <td>${user.role}</td>
+                        <td>
+                            <button class="action-btn" onclick="changeUserRole('${user._id}', '${user.role === 'admin' ? 'student' : 'admin'}')">
+                                ${user.role === 'admin' ? 'Remove Admin' : 'Make Admin'}
+                            </button>
+                        </td>
+                    `;
+                    userTableBody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error fetching users:', error);
+            }
+        }
+
+        // Fetch courses and populate course table
+        async function fetchCourses() {
+            try {
+                const response = await fetch('/api/courses', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const courses = await response.json();
+                const courseTableBody = document.querySelector('#courseTable tbody');
+                courseTableBody.innerHTML = '';
+                courses.forEach(course => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${course.title}</td>
+                        <td>${course.instructor}</td>
+                        <td>${course.duration} weeks</td>
+                        <td>
+                            <button class="action-btn" onclick="editCourse('${course._id}')">Edit</button>
+                            <button class="action-btn" onclick="deleteCourse('${course._id}')">Delete</button>
+                        </td>
+                    `;
+                    courseTableBody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error fetching courses:', error);
+            }
+        }
+
+        // Change user role
+        async function changeUserRole(userId, newRole) {
+            try {
+                const response = await fetch(`/api/admin/users/${userId}/role`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ role: newRole })
+                });
+                if (response.ok) {
+                    fetchUsers();
+                } else {
+                    console.error('Error changing user role');
+                }
+            } catch (error) {
+                console.error('Error changing user role:', error);
+            }
+        }
+
+        // Add new course
+        function addCourse() {
+            document.getElementById('courseModalTitle').textContent = 'Add New Course';
+            document.getElementById('courseForm').reset();
+            document.getElementById('courseModal').style.display = 'block';
+        }
+
+        // Edit course
+        function editCourse(courseId) {
+            // Fetch course details and populate form
+            // For simplicity, we're not implementing this in detail
+            document.getElementById('courseModalTitle').textContent = 'Edit Course';
+            document.getElementById('courseModal').style.display = 'block';
+        }
+
+        // Delete course
+        async function deleteCourse(courseId) {
+            if (confirm('Are you sure you want to delete this course?')) {
+                try {
+                    const response = await fetch(`/api/admin/courses/${courseId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    if (response.ok) {
+                        fetchCourses();
+                    } else {
+                        console.error('Error deleting course');
+                    }
+                } catch (error) {
+                    console.error('Error deleting course:', error);
+                }
+            }
+        }
+
+        // Course modal functionality
+        const courseModal = document.getElementById('courseModal');
+        const closeBtn = document.getElementsByClassName('close')[0];
+        const addCourseBtn = document.getElementById('addCourseBtn');
+
+        addCourseBtn.onclick = addCourse;
+        closeBtn.onclick = () => courseModal.style.display = 'none';
+        window.onclick = (event) => {
+            if (event.target == courseModal) {
+                courseModal.style.display = 'none';
+            }
+        }
+
+        // Handle course form submission
+        document.getElementById('courseForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const courseData = Object.fromEntries(formData.entries());
+            
+            try {
+                const response = await fetch('/api/admin/courses', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(courseData)
+                });
+                if (response.ok) {
+                    courseModal.style.display = 'none';
+                    fetchCourses();
+                } else {
+                    console.error('Error adding/editing course');
+                }
+            } catch (error) {
+                console.error('Error adding/editing course:', error);
+            }
+        });
+
+        // Logout function
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userRole');
+            window.location.href = '/login';
+        });
+
+        // Initialize dashboard
+        fetchUsers();
+        fetchCourses();
+
+        // Lesson modal functionality
+        const lessonModal = document.getElementById('lessonModal');
+        const lessonCloseBtn = lessonModal.querySelector('.close');
+        let currentCourseId;
+
+        function addLesson(courseId) {
+            currentCourseId = courseId;
+            document.getElementById('lessonForm').reset();
+            lessonModal.style.display = 'block';
+        }
+
+        lessonCloseBtn.onclick = () => lessonModal.style.display = 'none';
+
+        // Handle lesson form submission
+        document.getElementById('lessonForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const lessonData = Object.fromEntries(formData.entries());
+            
+            try {
+                const response = await fetch(`/api/admin/courses/${currentCourseId}/lessons`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(lessonData)
+                });
+                if (response.ok) {
+                    lessonModal.style.display = 'none';
+                    fetchCourses();
+                } else {
+                    console.error('Error adding lesson');
+                }
+            } catch (error) {
+                console.error('Error adding lesson:', error);
+            }
+        });
+
+        // Test modal functionality
+        const testModal = document.getElementById('testModal');
+        const testCloseBtn = testModal.querySelector('.close');
+        const addQuestionBtn = document.getElementById('addQuestion');
+        let questionCount = 0;
+
+        function addTest(courseId) {
+            currentCourseId = courseId;
+            document.getElementById('testForm').reset();
+            document.getElementById('questions').innerHTML = '';
+            questionCount = 0;
+            addQuestion();
+            testModal.style.display = 'block';
+        }
+
+        testCloseBtn.onclick = () => testModal.style.display = 'none';
+
+        function addQuestion() {
+            questionCount++;
+            const questionDiv = document.createElement('div');
+            questionDiv.innerHTML = `
+                <h4>Question ${questionCount}</h4>
+                <input type="text" name="question${questionCount}" required placeholder="Enter question">
+                <input type="text" name="option${questionCount}A" required placeholder="Option A">
+                <input type="text" name="option${questionCount}B" required placeholder="Option B">
+                <input type="text" name="option${questionCount}C" required placeholder="Option C">
+                <input type="text" name="option${questionCount}D" required placeholder="Option D">
+                <select name="correct${questionCount}" required>
+                    <option value="">Select correct answer</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                </select>
+            `;
+            document.getElementById('questions').appendChild(questionDiv);
+        }
+
+        addQuestionBtn.addEventListener('click', addQuestion);
+
+        // Handle test form submission
+        document.getElementById('testForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const testData = {
+                questions: []
+            };
+            
+            for (let i = 1; i <= questionCount; i++) {
+                testData.questions.push({
+                    text: formData.get(`question${i}`),
+                    options: [
+                        formData.get(`option${i}A`),
+                        formData.get(`option${i}B`),
+                        formData.get(`option${i}C`),
+                        formData.get(`option${i}D`)
+                    ],
+                    correctAnswer: formData.get(`correct${i}`)
+                });
+            }
+            
+            try {
+                const response = await fetch(`/api/admin/courses/${currentCourseId}/test`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testData)
+                });
+                if (response.ok) {
+                    testModal.style.display = 'none';
+                    fetchCourses();
+                } else {
+                    console.error('Error adding test');
+                }
+            } catch (error) {
+                console.error('Error adding test:', error);
+            }
+        });
+    </script>
+</body>
+</html>

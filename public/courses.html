@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Courses - EduPlatform</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="logo">
+                <h1>EduPlatform</h1>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="courses.html" class="active">Courses</a></li>
+                <li><a href="login.html">Login</a></li>
+                <li><a href="register.html">Register</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <h2>Available Courses</h2>
+        <div id="coursesList">
+            <!-- Courses will be loaded dynamically -->
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>About Us</h3>
+                <p>EduPlatform is dedicated to providing quality online education.</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 EduPlatform. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        async function fetchCourses() {
+            try {
+                const response = await fetch('/api/courses');
+                const courses = await response.json();
+
+                const coursesList = document.getElementById('coursesList');
+                coursesList.innerHTML = '';
+
+                courses.forEach(course => {
+                    const courseItem = document.createElement('div');
+                    courseItem.className = 'course-item';
+                    courseItem.innerHTML = `
+                        <h3>${course.name}</h3>
+                        <p>${course.description}</p>
+                        <button onclick="enrollCourse('${course._id}')">Enroll</button>
+                    `;
+                    coursesList.appendChild(courseItem);
+                });
+            } catch (error) {
+                console.error('Error fetching courses:', error);
+            }
+        }
+
+        async function enrollCourse(courseId) {
+            try {
+                const response = await fetch(`/api/courses/${courseId}/enroll`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                if (response.ok) {
+                    alert('Successfully enrolled in the course!');
+                } else {
+                    alert('Failed to enroll in the course.');
+                }
+            } catch (error) {
+                console.error('Error enrolling in course:', error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', fetchCourses);
+    </script>
+</body>
+</html>
